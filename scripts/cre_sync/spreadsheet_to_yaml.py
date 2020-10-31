@@ -150,7 +150,6 @@ def createPullRequest(apiToken:str, repo:str, title:str, srcBranch:str, targetBr
     body = "CRE Sync %s" % title
     pr = github.get_repo(repo).create_pull(title=title, body=body, head=srcBranch, base="master")
 
-
 def writeSpreadsheet(local, url):
     pass
 
