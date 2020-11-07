@@ -32,6 +32,7 @@ import json
 import os.path
 import logging
 import git
+
 from pprint import pprint
 from datetime import datetime
 from github import Github
@@ -76,6 +77,7 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+  
 def readSpreadsheet(url: str, cres_loc: str, alias:str):
     """given remote google spreadsheet url,
      reads each workbook into a yaml file"""
@@ -125,6 +127,7 @@ def add_to_github(cre_loc:str, alias:str,apikey):
 
     repo = git.Repo(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../"))
     g = git.Git()
+    
     logger.info("Adding cre files to branch %s"% branch_name)
     current_branch = repo.active_branch.name
     try:
@@ -149,6 +152,7 @@ def createPullRequest(apiToken:str, repo:str, title:str, srcBranch:str, targetBr
     github = Github(apiToken)
     body = "CRE Sync %s" % title
     pr = github.get_repo(repo).create_pull(title=title, body=body, head=srcBranch, base="master")
+
 
 def writeSpreadsheet(local, url):
     pass
