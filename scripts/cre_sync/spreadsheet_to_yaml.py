@@ -143,6 +143,7 @@ def add_to_github(cre_loc:str, alias:str,apikey):
         # if there's an error (commonly due to no changes, skip pushing a new branch)
         logger.error("Skipping push due to git error trying to sync " + commit_msg)
         logger.error(gce)
+            
     g.checkout(current_branch)
 
 
