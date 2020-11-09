@@ -16,14 +16,18 @@ jobs:
       #   GITHUB_API_KEY: ${{ secrets.AWS_S3_BUCKET }}
       #   GITHUB_SSH_PUSH: ${{ secrets.AWS_ACCESS_KEY_ID }}
     - name: Setup
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+        architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       env: 
         SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
         SSH_KEY: ${{ secrets.SSH_KEY }}
         GITHUB_API_KEY: ${{ secrets.API_KEY }}
-      run: |
+    - run: |
         sudo apt update && sudo apt install -y python3-pip git
         
-      
+
 
         mkdir -p ~/.ssh ~/.config/gspread
         ssh-keyscan github.com > ~/.ssh/known_hosts
