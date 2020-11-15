@@ -1,29 +1,3 @@
-# make spreadsheets a frontend for the cre api
-# export from spreadsheet to yaml
-# yaml to github as a pull request
-# import from rest api to spreadsheet
-
-# given: a spreadsheet url
-#   export to yaml
-#   pull latest yaml from github
-#   git merge
-#   push to merge branch
-
-# Qs:
-# * do i have fs access with a spreadsheet app?
-# * can i run git commands?
-# * how do we make users setup a github account? maybe get them to create a GH api token?
-# if i provide a GO/pex binary
-#   can i compile for mac and windows?
-#   is there a github client for go?
-#   spreadsheets?
-
-# A:
-# i can sync s3 and google sheets
-# i miss on merging
-# i miss on who did what
-#
-
 import gspread
 import yaml
 import tempfile
@@ -44,6 +18,9 @@ from github import Github
 # only create a pull request if there are changes (run a git diff first?) -- done
 # sync to spreadsheet (different script runs from master)
 # make github action -- done
+# feature: grab both link text and link value from spreadsheet -- very hard with gspread
+# feature: make schema extendable, have a KEYS list representing supported standards/keywords(can be "test with, controls etc")
+#  and then optionally map a cre to standards  -- done, schema is a separate file, easily extendable to recognise other standards
 
 spreadsheets_file = "working_spreadsheets.yaml"
 commit_msg_base = "cre_sync_%s" % (datetime.now().isoformat().replace(":", "."))
@@ -51,33 +28,14 @@ commit_msg_base = "cre_sync_%s" % (datetime.now().isoformat().replace(":", "."))
 # gspread_creds_file = " ~/.config/gspread/credentials.json" # OAUTH default credentials location
 # gspread_creds_file = "~/.config/gspread/service_account.json" # Service Account default creds location
 
-CRE_LINK_schema = {
-    "type": "array",
-    "items": {
-        "type": "object",
-        "properties": {
-            "CRE-ID-lookup-from-taxonomy-table": {"type": "string"},
-            "CS": {"type": "string"},
-            # type string handles the edge-case of empty cell
-            "CWE": {"type": ["number", "string"]},
-            "Description": {"type": "string"},
-            "Development guide (does not exist for SessionManagement)": {"type": "string"},
-            "ID-taxonomy-lookup-from-ASVS-mapping": {"type": "string"},
-            "Item": {"type": "string"},
-            "Name": {"type": "string"},
-            "OPC": {"type": "string"},
-            "Top10 (lookup)": {"type": "string"},
-            "WSTG": {"type": "string"},
-        },
-        "required": ["CRE-ID-lookup-from-taxonomy-table", "Description"]
-    }
-}
+
 logging.basicConfig()
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-  
+CRE_LINK_schema={}
+
 def readSpreadsheet(url: str, cres_loc: str, alias:str):
     """given remote google spreadsheet url,
      reads each workbook into a yaml file"""
@@ -88,11 +46,13 @@ def readSpreadsheet(url: str, cres_loc: str, alias:str):
         sh = gc.open_by_url(url)
         logger.debug("accessing spreadsheet \"%s\" : \"%s\""%(alias,url))
         for wsh in sh.worksheets():
-            if wsh.title[0].isdigit():
+            if wsh.title[0].isdigit() and wsh.title == '4. foo test':
                 logger.debug(
                     "handling worksheet %s  (remember, only numbered worksheets will be processed by convention)" % wsh.title)
+
                 records = wsh.get_all_records()
                 toyaml = yaml.safe_load(yaml.dump(records))
+
                 try:
                     validateYaml(yamldoc=toyaml, schema=CRE_LINK_schema)
                     logger.debug("Worksheet is valid, saving to disk")
@@ -160,8 +120,13 @@ def writeSpreadsheet(local, url):
 
 
 def main():
+    global CRE_LINK_schema
     script_path = os.path.dirname(os.path.realpath(__file__))
     cre_loc = os.path.join(script_path, "../../cres")
+    schema_loc = os.path.join(script_path,"cre_schema.json")
+    with open(schema_loc,'r') as schema_file:
+        CRE_LINK_schema = json.load(schema_file)
+
     with open(os.path.join(script_path, spreadsheets_file)) as sfile:
         create_branch(commit_msg_base)
         urls = yaml.safe_load(sfile)
