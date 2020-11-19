@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  cre-rest-api
+
+  Function Serving the CRE REST API
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  CRErest:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: cre_rest/
+      Handler: app.lambda_handler
+      Runtime: python3.8
+      Environment:
+        Variables:
+          BUCKET_NAME: cre-bucket-test01
+          BUCKET_ARN: arn:aws:s3:::cre-bucket-test01
+      Events:
+        GETcre:
+          Type: Api 
+          Properties:
+            Path: /cre/id
+            Method: get
+        GETAllcre:
+          Type: Api 
+          Properties:
+            Path: /cre
+            Method: get
+        GETLink:
+          Type: Api 
+          Properties:
+            Path: /link
+            Method: get
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  CRE-API:
+    Description: "API Gateway endpoint URL for Prod stage for CRE Rest function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/cre/"
+  CRErest:
+    Description: "CRE Rest Lambda Function ARN"
+    Value: !GetAtt CRErest.Arn
+  CRErestFunctionIamRole:
+    Description: "Implicit IAM Role created for CRE api function"
+    Value: !GetAtt CRErestFunctionIamRole.Arn
