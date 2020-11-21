@@ -44,10 +44,9 @@ def filter_link_is_mentioned_in_cres(cre_file, link_tag, link_value):
     cre_yaml = yaml.safe_load(cre_file)   
     for cre in cre_yaml:
         theset = set(k.lower() for k in cre)
-        # pprint(theset)
         if link_tag.lower() in theset:
             for k, v in cre.items():
-                if k.lower() == link_tag.lower() and str(v) == link_value:
+                if k.lower() == link_tag.lower() and str(v) == str(link_value):
                     res.append(cre)
     return res
 
@@ -66,11 +65,6 @@ def get_file(bucket, file_obj):
     s3_res = boto3.resource('s3')
     return s3_res.Object(bucket, file_obj['Key']).get()['Body'].read().decode()
 
-# TODO:
-# * create testing events
-# * create error handling method
-# * create local e2e testing script
-# * add paths and query string and auth to template.yaml
 
 def lambda_handler(event, context):
     ret = {
@@ -80,15 +74,15 @@ def lambda_handler(event, context):
     cres = []
     path = event.get('path')
     query_str = event.get("queryStringParameters")
-    path_params = event.get('pathParameters')
+    path_params = event.get("pathParameters")
     logger.debug("called with query_str %s"%query_str)
     logger.debug("called with path_params ")
-    logger.debug(path_params)
+    logger.debug(event.get("pathParameters"))
 
-    if path_params:
-        if "cre_id" in path_params and path_params["cre_id"] != "":
+    pprint(query_str)
+    if "cre" in path and "id" in path_params and path_params["id"] != "":
             #filter by cre_id
-            cre_id = path_params["cre_id"]
+            cre_id = path_params["id"]
             logger.debug("filtering by cre_id %s"%cre_id)
             cres.extend([filter_cre_id(cre_file,cre_id) for cre_file in s3_file_generator()])
     elif "link" in path and 'tag' in query_str and 'val' in query_str:

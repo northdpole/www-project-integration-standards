@@ -8,7 +8,11 @@ Globals:
   Function:
     Timeout: 30
 
-Resources:
+Resources:  
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
   CRErest:
     Type: AWS::Serverless::Function
     Properties:
@@ -23,7 +27,10 @@ Resources:
         GETcre:
           Type: Api 
           Properties:
-            Path: /cre/id
+            Path: /cre/{id}
+            RequestParameters:
+              - method.request.querystring.id:
+                  Required: true
             Method: get
         GETAllcre:
           Type: Api 
@@ -35,6 +42,11 @@ Resources:
           Properties:
             Path: /link
             Method: get
+            RequestParameters:
+              - method.request.querystring.val:
+                  Required: true
+              - method.request.querystring.tag:
+                  Required: true
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
