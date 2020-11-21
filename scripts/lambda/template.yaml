@@ -6,7 +6,7 @@ Description: >
   Function Serving the CRE REST API
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 30
 
 Resources:
   CRErest:
@@ -28,7 +28,7 @@ Resources:
         GETAllcre:
           Type: Api 
           Properties:
-            Path: /cre
+            Path: /cres
             Method: get
         GETLink:
           Type: Api 

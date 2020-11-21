@@ -15,8 +15,11 @@ def filter_cre_id(cre_file, cre_id):
     path: /cre/{id}"""
     res = []
     cres = ""
-    cre_file = yaml.safe_load(cre_file)   
-    for cre in cre_file:
+    cre_list = yaml.safe_load(cre_file)
+    if type(cre_list) != list:
+        return res
+
+    for cre in cre_list:
         if cre_id == cre.get('CRE-ID-lookup-from-taxonomy-table'):
             res.append(cre)
     return res
@@ -38,20 +41,19 @@ def filter_link_is_mentioned_in_cres(cre_file, link_tag, link_value):
     path: /link?tag=x&value=y
      """
     res = []
-    cres = ""
-    cre_file = yaml.safe_load(cre_file)   
-    for cre in cre_file:
+    cre_yaml = yaml.safe_load(cre_file)   
+    for cre in cre_yaml:
         theset = set(k.lower() for k in cre)
+        # pprint(theset)
         if link_tag.lower() in theset:
             for k, v in cre.items():
-                if k.lower() == link_tag.lower() and cre[k] == link_value:
+                if k.lower() == link_tag.lower() and str(v) == link_value:
                     res.append(cre)
     return res
 
 
 def cre_to_json_str(cre):
     res = json.dumps(cre)
-    logger.info(res)
     return res or ""
 
 def list_files(bucket):
@@ -69,12 +71,14 @@ def get_file(bucket, file_obj):
 # * create error handling method
 # * create local e2e testing script
 # * add paths and query string and auth to template.yaml
+
 def lambda_handler(event, context):
     ret = {
              'statusCode': 200,
              'body':"foo",
          }
     cres = []
+    path = event.get('path')
     query_str = event.get("queryStringParameters")
     path_params = event.get('pathParameters')
     logger.debug("called with query_str %s"%query_str)
@@ -84,15 +88,16 @@ def lambda_handler(event, context):
     if path_params:
         if "cre_id" in path_params and path_params["cre_id"] != "":
             #filter by cre_id
-            logger.debug("filtering by cre_id")
-            cres.extend([filter_cre_id(cre_file) for cre_file in s3_file_generator()])
-        elif "link" in path_params:
+            cre_id = path_params["cre_id"]
+            logger.debug("filtering by cre_id %s"%cre_id)
+            cres.extend([filter_cre_id(cre_file,cre_id) for cre_file in s3_file_generator()])
+    elif "link" in path and 'tag' in query_str and 'val' in query_str:
             logger.debug("filtering by link")
             link_tag = query_str.get('tag', None)
             link_value = query_str.get('val', None)    
             cres.extend([filter_link_is_mentioned_in_cres(cre_file,link_tag,link_value) for cre_file in s3_file_generator()])    
             pass #filter by link
-        elif "cres" in path_params:
+    elif "cres" in path:
             #get all
             logger.debug("getting everything")
             cres.extend([filter_all(cre_file) for cre_file in s3_file_generator()])
@@ -100,8 +105,9 @@ def lambda_handler(event, context):
         logger.debug("error")
         error("this seems to have been misconfigured")
 
-    logger.info(cre_to_json_str(cres))
-    # ret['body']['cres'] = cre_to_json_str(cres)
+    # logger.info(cre_to_json_str(cres))
+    ret['body'] = {}
+    ret['body']['cres'] = cre_to_json_str(cres)
         
     return ret
 
