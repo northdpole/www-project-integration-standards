@@ -2,17 +2,12 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
   cre-rest-api
-
   Function Serving the CRE REST API
 Globals:
   Function:
     Timeout: 30
 
-Resources:  
-  ApiGatewayApi:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName: prod
+Resources:
   CRErest:
     Type: AWS::Serverless::Function
     Properties:
@@ -28,9 +23,6 @@ Resources:
           Type: Api 
           Properties:
             Path: /cre/{id}
-            RequestParameters:
-              - method.request.querystring.id:
-                  Required: true
             Method: get
         GETAllcre:
           Type: Api 
@@ -48,11 +40,8 @@ Resources:
               - method.request.querystring.tag:
                   Required: true
 
-Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  CRE-API:
+Outputs: 
+  CREAPI:
     Description: "API Gateway endpoint URL for Prod stage for CRE Rest function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/cre/"
   CRErest:
@@ -60,4 +49,4 @@ Outputs:
     Value: !GetAtt CRErest.Arn
   CRErestFunctionIamRole:
     Description: "Implicit IAM Role created for CRE api function"
-    Value: !GetAtt CRErestFunctionIamRole.Arn
+    Value: "arn:aws:iam::215139404784:role/CRErestFunctionIamRole"

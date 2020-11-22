@@ -30,7 +30,9 @@ def filter_all(cre_file):
     path: /cre"""
     res = []
     cres = ""
-    cre_file = yaml.safe_load(cre_file)   
+    cre_file = yaml.safe_load(cre_file)
+    if cre_file == "keep":
+        return res
     for cre in cre_file:
         res.append(cre)
     return res
@@ -79,8 +81,8 @@ def lambda_handler(event, context):
     logger.debug("called with path_params ")
     logger.debug(event.get("pathParameters"))
 
-    pprint(query_str)
-    if "cre" in path and "id" in path_params and path_params["id"] != "":
+    
+    if "cre" in path and path_params and path_params.get("id"):
             #filter by cre_id
             cre_id = path_params["id"]
             logger.debug("filtering by cre_id %s"%cre_id)
@@ -101,7 +103,7 @@ def lambda_handler(event, context):
 
     # logger.info(cre_to_json_str(cres))
     ret['body'] = {}
-    ret['body']['cres'] = cre_to_json_str(cres)
+    ret['body'] = cre_to_json_str(cres)
         
     return ret
 
