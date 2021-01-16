@@ -2,6 +2,7 @@
 /Gemfile.lock
 /favicon.ico
 _site/
+__pycache__
 
 
 ### vscode ###
@@ -10,3 +11,7 @@ _site/
 
 ## act secrets
 .secrets/
+
+### conventions ###
+venv/
+v/
