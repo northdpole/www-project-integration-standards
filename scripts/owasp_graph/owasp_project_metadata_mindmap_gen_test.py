@@ -82,32 +82,13 @@ class TestProjMetadataParsers(unittest.TestCase):
 
         self.assertEqual(self.metadata, build_metadata(org_dict,repo_dict))
     
-    @patch('github3.GitHub')
-    @patch('github3.GitHub.search_code')
-    @patch('requests.get')
-    def test_gather_metadata(self,patched_requests,patched_search_code,patched_github):
-        search_res = namedtuple("SearchRes","url")
-        requests_obj = namedtuple("Reqs",["status_code","text"])
-
-        patched_search_code.return_value= [search_res(url="https://foo.bar.baz")]
-        patched_requests.return_value = requests_obj(status_code=200,text= '{"name":"info.yaml","path":"info.yaml","sha":"12940ba7e1aff97a9d756663664042165fa70ea3","size":303,"url":"https://api.github.com/repos/testOrgForMetadataScript/testRepo1/contents/info.yaml?ref=aef89606c1a9223b86d000a2c3a34c5b3d1dbae7","html_url":"https://github.com/testOrgForMetadataScript/testRepo1/blob/aef89606c1a9223b86d000a2c3a34c5b3d1dbae7/info.yaml","git_url":"https://api.github.com/repos/testOrgForMetadataScript/testRepo1/git/blobs/12940ba7e1aff97a9d756663664042165fa70ea3","download_url":"https://raw.githubusercontent.com/testOrgForMetadataScript/testRepo1/aef89606c1a9223b86d000a2c3a34c5b3d1dbae7/info.yaml","type":"file","content":"CnsiaW5mbyIgOiB7CiAgICAibmFtZSI6InRlc3RPcmcvdGVzdFJlcG8xIiwK\\nICAgICJyZXBvc2l0b3J5IjoiaHR0cHM6Ly9naXRodWIuY29tL3Rlc3RPcmdG\\nb3JNZXRhZGF0YVNjcmlwdC90ZXN0UmVwbzEiLAogICAgInRhZ3MiOlsiYnVp\\nbGRlcnMiLCJmb28iLCJiYXIiXSwKICAgICJzZGxjIjpbIkFuYWx5c2lzIiwi\\nSW1wbGVtZW50YXRpb24iXSwKICAgICJleGFtcGxlX3VzYWdlIjoiaHR0cHM6\\nLy9kZW1vLnRlc3RPcmcudGVzdFJlcG8xLm9yZyIsCiAgICAib3V0cHV0X3R5\\ncGUiOlsidXJscyIsImd1aWRlbGluZXMiXQogICAgfQp9\\n","encoding":"base64","_links":{"self":"https://api.github.com/repos/testOrgForMetadataScript/testRepo1/contents/info.yaml?ref=aef89606c1a9223b86d000a2c3a34c5b3d1dbae7","git":"https://api.github.com/repos/testOrgForMetadataScript/testRepo1/git/blobs/12940ba7e1aff97a9d756663664042165fa70ea3","html":"https://github.com/testOrgForMetadataScript/testRepo1/blob/aef89606c1a9223b86d000a2c3a34c5b3d1dbae7/info.yaml"}}')
-        
-        metadata = [{'info': {'example_usage': 'https://demo.testOrg.testRepo1.org',
-           'name': 'testOrg/testRepo1',
-           'output_type': ['urls', 'guidelines'],
-           'repository': 'https://github.com/testOrgForMetadataScript/testRepo1',
-           'sdlc': ['Analysis', 'Implementation'],
-           'tags': ['builders', 'foo', 'bar']}}]
-
-        self.assertEqual(metadata,gather_metadata(None,"orgname"))
-        patched_search_code.assert_called_with("org:orgname filename:info.yaml path:/")
-        patched_requests.assert_called_with("https://foo.bar.baz")
-
-
-        self.assertEqual(metadata,gather_metadata("reponame",None))
-        patched_search_code.assert_called_with("repo:reponame filename:info.yaml path:/")
-        pass
+    @patch('')
+    def test_get_project_meta(self,patched_github):
+       pass
     
+    def test_extract_index_meta(self):
+        pass
+        
     @unittest.skip('todo')
     def test_enhance_metadata(self):
         pass
